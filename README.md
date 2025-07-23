@@ -10,6 +10,7 @@ This project focuses on analyzing and optimizing the performance of a power plan
 - Provide automated recommendations using a chatbot.
 - Visualize trends and efficiency graphs.
 ## 📂 Folder Structure
+
 Powerplantefficiencyanalysis/
 │
 ├── AIchatbox.py # Chatbot for analyzing parameter deviations
