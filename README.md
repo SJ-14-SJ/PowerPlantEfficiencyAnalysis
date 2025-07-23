@@ -1,12 +1,12 @@
 # Power Plant Efficiency Analysis 🔥⚡
 
-This project analyzes and visualizes the efficiency of boiler and turbine systems in a power plant using Python and Excel data.
+This project analyzes and visualizes the efficiency of boiler and turbine systems in a power plant in order to increase the overall efficiency of the powerplant using Python.
 
 ## 📂 Project Contents
 - **Boiler & Turbine Data Analysis**
 - **Linear Regression Forecasting**
 - **Deviation Analysis & Trend Plots**
-- **AI Chatbox for Recommendations**
+- **AI Chatbot for Recommendations**
 
 ## 📁 Files
 - `.py` files: Data processing, forecasting, chatbot logic.
@@ -17,5 +17,5 @@ This project analyzes and visualizes the efficiency of boiler and turbine system
 - Python (Pandas, Matplotlib, Seaborn)
 - Excel
 - Linear Regression
-- Streamlit (optional for UI)
+- Streamlit 
 
