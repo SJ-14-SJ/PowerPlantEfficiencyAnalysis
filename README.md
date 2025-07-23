@@ -1,6 +1,6 @@
 # Power Plant Efficiency Analysis 🔥⚡
 
-This project analyzes and visualizes the efficiency of boiler and turbine systems in a power plant in order to increase the overall efficiency of the powerplant using Python.
+This project analyzes and visualizes the efficiency of boiler and turbine systems in a power plant in order to increase the overall efficiency using Python. It also predicts the future functionings of the powerplant using linear regression model.
 
 ## 📂 Project Contents
 - **Boiler & Turbine Data Analysis**
