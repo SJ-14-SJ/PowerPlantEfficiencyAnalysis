@@ -1,39 +1,9 @@
 import pandas as pd
+from analysis import ROOT, load_measurements, deviation_percent
 
-turbine_path = "project.xlsx"
-boiler_path = "Boiler.xlsx"
-
-df_boiler = pd.read_excel(boiler_path, sheet_name="Boiler", skiprows=1)
-unnamed_cols = [col for col in df_boiler.columns if "Unnamed:" in col]
-if unnamed_cols:
-    df_boiler = df_boiler.drop(columns=unnamed_cols)
-
-
-boiler_columns = [
-    "Parameter", "Design", "October", "November", "December",
-    "January", "February", "March", "Performance"
-]
-df_boiler.columns = boiler_columns
-df_boiler["Source"] = "Boiler"
-
-df_turbine = pd.read_excel(turbine_path, sheet_name="Turbine", skiprows=1)
-unnamed_cols = [col for col in df_turbine.columns if "Unnamed:" in col]
-if unnamed_cols:
-    df_turbine = df_turbine.drop(columns=unnamed_cols)
-
-turbine_columns = [
-    "Parameter", "Design", "October", "November", "December",
-    "January", "February", "March", "Performance"
-]
-df_turbine.columns = turbine_columns
-df_turbine["Source"] = "Turbine"
-
-combined_df = pd.concat([df_boiler, df_turbine], ignore_index=True)
-
-combined_df["% Deviation"] = ((combined_df["Performance"] - combined_df["Design"]) / combined_df["Design"]) * 100
-
-
-def gpt_like_recommendation(row):
+def rule_based_recommendation(row):
+    if pd.isna(row["% Deviation"]):
+        return "Insufficient data or zero design baseline"
     param = str(row["Parameter"]).lower()
     deviation = row["% Deviation"]
 
@@ -61,11 +31,19 @@ def gpt_like_recommendation(row):
     else:
         return f"{row['Parameter']} has a deviation of {deviation:.2f}%. Further investigation is recommended to maintain optimal operation."
 
-combined_df["GPT_Recommendation"] = combined_df.apply(gpt_like_recommendation, axis=1)
+
 
 
 
 def chatbot():
+    frames = []
+    for source, filename in [("Boiler", "Boiler.xlsx"), ("Turbine", "project.xlsx")]:
+        frame = load_measurements(ROOT / filename, source)
+        frame["Source"] = source
+        frames.append(frame)
+    combined_df = pd.concat(frames, ignore_index=True)
+    combined_df["% Deviation"] = combined_df.apply(lambda r: deviation_percent(r["Performance"], r["Design"]), axis=1)
+    combined_df["Recommendation"] = combined_df.apply(rule_based_recommendation, axis=1)
     print("\n🤖 Power Plant Chatbot (Boiler + Turbine): Ask me about any parameter!")
     print("Type 'exit' to quit.\n")
 
@@ -78,7 +56,11 @@ def chatbot():
             print("Goodbye! 💡")
             break
 
-        matches = combined_df[combined_df["Parameter"].str.lower().str.contains(user_input)]
+        if not user_input:
+            print("Enter a parameter name or keyword.")
+            continue
+
+        matches = combined_df[combined_df["Parameter"].str.lower().str.contains(user_input, regex=False, na=False)]
 
         if matches.empty:
             print("❌ Sorry, I couldn't find that parameter. Try a different keyword.\n")
@@ -87,6 +69,7 @@ def chatbot():
                 print(f"\n📌 Source: {row['Source']}")
                 print(f"🔧 Parameter: {row['Parameter']}")
                 print(f"📊 Deviation: {row['% Deviation']:.2f}%")
-                print(f"🧠 Recommendation: {row['GPT_Recommendation']}\n")
+                print(f"🧠 Recommendation: {row['Recommendation']}\n")
 
-chatbot()
+if __name__ == "__main__":
+    chatbot()
