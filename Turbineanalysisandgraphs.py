@@ -1,34 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from analysis import ROOT, MONTHS, load_measurements, summarize
 
-
-file_path = "project.xlsx"
-df = pd.read_excel(file_path, sheet_name='Turbine', skiprows=1)
-
-df = df.iloc[:, :9].dropna(subset=["Parameters"]) # Changed 'Parameter' to 'Parameters'
-df.columns = [
-    "Parameter", "Design", "October", "November", "December",
-    "January", "February", "March", "Performance"
-]
-
-months = ["October", "November", "December", "January", "February", "March"]
-for col in ["Design", "Performance"] + months:
-    df[col] = pd.to_numeric(df[col], errors='coerce')
-
-df["Calculated Performance"] = df.apply(
-    lambda row: min(
-        (row[month] for month in months if pd.notnull(row[month])),
-        key=lambda x: abs(x - row["Design"]),
-        default=None
-    ),
-    axis=1
-)
-
-df["% Deviation"] = ((df["Calculated Performance"] - df["Design"]) / df["Design"]) * 100
-df["Significant Deviation"] = df["% Deviation"].abs() > 5
+df = summarize(load_measurements(ROOT / "project.xlsx", "Turbine"))
+months = MONTHS
 
 def generate_recommendation(row):
+    if pd.isna(row["% Deviation"]):
+        return "Insufficient data or zero design baseline"
+    if abs(row["% Deviation"]) <= 5:
+        return "Within prototype threshold"
     param = str(row["Parameter"]).lower()
     deviation = row["% Deviation"]
     if "pressure" in param:
